@@ -25,6 +25,11 @@ const Settings = Loadable({
   loading: Loading
 });
 
+const Notifications = Loadable({
+  loader: () => import('./Notifications'),
+  loading: Loading
+});
+
 const Login = Loadable({
   loader: () => import('./Login'),
   loading: Loading
@@ -40,6 +45,16 @@ const ArticleEdit = Loadable({
   loading: Loading
 });
 
+const NoAuth = Loadable({
+  loader: () => import('./NoAuth'),
+  loading: Loading
+});
+
+const Profile = Loadable({
+  loader: () => import('./Profile'),
+  loading: Loading
+});
+
 export {
   Dashboard,
   Login,
@@ -47,4 +62,7 @@ export {
   Settings,
   Article,
   ArticleEdit,
+  Notifications,
+  NoAuth,
+  Profile,
 }

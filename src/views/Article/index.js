@@ -92,6 +92,7 @@ export default class Article extends Component {
       .then(res => {
         const keys = Object.keys(res.list[0]);
         const columns = this.createColumns(keys)
+        if (!this.updater.isMounted(this)) return
           that.setState({
             total: res.total,
             columns,
@@ -101,6 +102,7 @@ export default class Article extends Component {
       console.log(err, '<-err->');
       }))
       .finally(() => {
+        if (!this.updater.isMounted(this)) return
         this.setState({
         isLoading: false
       })
@@ -121,7 +123,7 @@ export default class Article extends Component {
       cancelText: '取消',
       okText: '确定',
       onOk() {
-        const hide = message.loading('删除中', 0)
+        message.loading('删除中', 0)
         deleteArticle(record.id)
           .then((res) => {
             that.setState({
@@ -130,9 +132,9 @@ export default class Article extends Component {
           }).catch((err) => {
             console.log(err, '<-err->');
           }).finally(() => {
-            // message.destroy(hide)
-            // message.success(that.state.msg)
-            // that.getData();
+            message.destroy()
+            message.success(that.state.msg)
+            that.getData();
         })
       },
       onCancel() {},

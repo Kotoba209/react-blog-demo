@@ -1,49 +1,101 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
+import { connect } from 'react-redux'
 
 import { adminRouter } from '../../router';
 import logo from './logo.png';
-import './Frame.css'
-import { Layout, Menu, Breadcrumb, Icon } from 'antd';
-import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons';
-// import { Frame } from '..';
+import './Frame.less'
+import {
+  Layout,
+  Menu,
+  Dropdown,
+  Avatar,
+  Badge,
+} from 'antd';
+// import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons';
 
-const { SubMenu } = Menu;
+import { getNotificationList } from '../../actions/notifications'
+import { logout } from '../../actions/users'
+// import { Frame } from '..';
 const { Header, Content, Sider } = Layout;
 // @withRouter;
 
 const menus = adminRouter.filter(route => route.isNav === true);
 
+const mapState = state => {
+  return {
+    notificationsCount: state.notifications.list.filter(val => val.hasRead === false).length,
+    avatar: state.users.avatar,
+    displayName: state.users.displayName
+  }
+}
+
 // @withRouter
-  
+@connect(mapState, { getNotificationList, logout })
 class Frame extends Component {
 
-  onMenuClick = (e) => {
-    // console.log(e, '<-e->');
-  } 
+  componentDidMount() {
+    this.props.getNotificationList()
+  }
+
+  onMenuClick = ({ key }) => {
+    this.props.history.push(key)
+  }
+
+  onDropDownMenuClick = ({key}) => {
+    if (key === '/logout') {
+      this.props.logout()
+    } else {
+      this.props.history.push(key)
+    }
+  }
 
   render() {
+    const menu = (
+      <Menu onClick={this.onDropDownMenuClick}>
+        <Menu.Item
+          key='/admin/notifications'
+        >
+          <Badge dot={Boolean(this.props.notificationsCount)}>
+            通知中心
+          </Badge>
+        </Menu.Item>
+        <Menu.Item
+        key='/admin/profile'
+        >
+          <Badge>
+            个人设置
+          </Badge>
+        </Menu.Item>
+        <Menu.Item
+        key='/logout'
+        >
+          <Badge>
+            退出
+          </Badge>
+        </Menu.Item>
+      </Menu>
+    );
 
     const selectedKeyArr = this.props.location.pathname.split('/')
     selectedKeyArr.length = 3
 
-    return (
-      <div style={{height: '100%'}}>
-        <Layout style={{minHeight: '100%'}}>
-          <Header className="header ko-header">
-            <div className='ko-logo'>
-              <img src={logo} alt='logo' />
-            </div>
-      {/* <Menu
-        theme="dark"
-        mode="horizontal"
-        defaultSelectedKeys={['2']}
-        style={{ lineHeight: '64px' }}
-      >
-        <Menu.Item key="1">nav 1</Menu.Item>
-        <Menu.Item key="2">nav 2</Menu.Item>
-        <Menu.Item key="3">nav 3</Menu.Item>
-      </Menu> */}
+  return (
+  <div style={{height: '100%'}}>
+  <Layout style={{minHeight: '100%'}}>
+    <Header className="header ko-header">
+      <div className='ko-logo'>
+        <img src={logo} alt='logo' />
+      </div>
+
+      <Dropdown overlay={menu} placement="bottomCenter">
+        <div className='tips'>
+        <Badge count={this.props.notificationsCount}>
+          <Avatar size="large" src={this.props.avatar} />
+        </Badge>
+              <span className='nickName'>欢迎您！{this.props.displayName}</span>
+        </div>
+      </Dropdown>
     </Header>
     <Layout>
       <Sider width={200} className="site-layout-background">
@@ -53,67 +105,20 @@ class Frame extends Component {
           selectedKeys={[selectedKeyArr.join('/')]}
           style={{ height: '100%', borderRight: 0 }}
         >
-          {/* <SubMenu
-            key="sub1"
-            title={
-              <span>
-                <UserOutlined />
-                subnav 1
-              </span>
-            }
-          > */}
-                {
-                  menus.map(route => {
-                    return (
-                      <Menu.Item key={route.pathname}>
-                        <Link to={route.pathname}>
-                        {route.title}
-                        </Link>
-                      </Menu.Item>
-                  )
-            })
-                }
-            {/* <Menu.Item key="1">option1</Menu.Item>
-            <Menu.Item key="2">option2</Menu.Item>
-            <Menu.Item key="3">option3</Menu.Item>
-            <Menu.Item key="4">option4</Menu.Item> */}
-          {/* </SubMenu> */}
-          {/* <SubMenu
-            key="sub2"
-            title={
-              <span>
-                <LaptopOutlined />
-                subnav 2
-              </span>
-            }
-          >
-            <Menu.Item key="5">option5</Menu.Item>
-            <Menu.Item key="6">option6</Menu.Item>
-            <Menu.Item key="7">option7</Menu.Item>
-            <Menu.Item key="8">option8</Menu.Item>
-          </SubMenu> */}
-          {/* <SubMenu
-            key="sub3"
-            title={
-              <span>
-                <NotificationOutlined />
-                subnav 3
-              </span>
-            }
-          >
-            <Menu.Item key="9">option9</Menu.Item>
-            <Menu.Item key="10">option10</Menu.Item>
-            <Menu.Item key="11">option11</Menu.Item>
-            <Menu.Item key="12">option12</Menu.Item>
-          </SubMenu> */}
+          {
+            menus.map(route => {
+              return (
+                <Menu.Item key={route.pathname}>
+                  <Link to={route.pathname}>
+                    {route.title}
+                  </Link>
+                </Menu.Item>
+              )
+          })
+          }
         </Menu>
       </Sider>
       <Layout style={{ padding: '0 24px 24px' }}>
-        {/* <Breadcrumb style={{ margin: '16px 0' }}>
-          <Breadcrumb.Item>Home</Breadcrumb.Item>
-          <Breadcrumb.Item>List</Breadcrumb.Item>
-          <Breadcrumb.Item>App</Breadcrumb.Item>
-        </Breadcrumb> */}
         <Content
           className="site-layout-background"
           style={{
@@ -126,7 +131,7 @@ class Frame extends Component {
       </Layout>
     </Layout>
   </Layout>,
-      </div>
+  </div>
     )
   }
 }
